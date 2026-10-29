@@ -5,6 +5,7 @@ import (
 
 	"github.com/Dwi-Susilo/gin-user-crud/database"
 	"github.com/Dwi-Susilo/gin-user-crud/models"
+	"github.com/Dwi-Susilo/gin-user-crud/utils"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -13,40 +14,33 @@ func CreateUser(c *gin.Context)  {
 	var input models.User
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+		utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	user := models.User{Name: input.Name, Email: input.Email, Password: input.Password}
 
 	if err := database.DB.Create(&user).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		utils.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	user.Password = ""
-	c.JSON(http.StatusCreated, gin.H{"data": user})
+	utils.SuccessResponse(c, http.StatusCreated,  "User created successfully", user)
 
 }
 
 func GetUsers(c *gin.Context)  {
 	var users []models.User
 	if err := database.DB.Find(&users).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		utils.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	for i := range users {
 		users[i].Password = ""
 	}
-
-	c.JSON(http.StatusOK, gin.H{"data": users})
+	utils.SuccessResponse(c, http.StatusOK,  "Get all users successfully", users)
 }
 
 func GetUser(c *gin.Context)  {
@@ -56,21 +50,15 @@ func GetUser(c *gin.Context)  {
 
 	if err := database.DB.First(&user, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{
-				"error": "User not found",
-			})
+			utils.ErrorResponse(c, http.StatusNotFound, "User not found")
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		utils.ErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	user.Password = ""
-	c.JSON(http.StatusOK, gin.H{
-		"data": user,
-	})
+	utils.SuccessResponse(c, http.StatusOK, "User retrieved successfully", user)
 }
 
 func UpdateUser(c *gin.Context)  {
@@ -79,17 +67,13 @@ func UpdateUser(c *gin.Context)  {
 	var user models.User
 
 	if err := database.DB.First(&user, id).Error; err != nil {
-        c.JSON(http.StatusNotFound, gin.H{
-			"error": "User not found",
-		})
+        utils.ErrorResponse(c, http.StatusNotFound, "User not found")
         return
     }
 
 	var input models.User
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+		utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -102,9 +86,7 @@ func UpdateUser(c *gin.Context)  {
 
 	database.DB.Save(&user)
 	user.Password = ""
-	c.JSON(http.StatusOK, gin.H{
-		"data": user,
-	})
+	utils.SuccessResponse(c, http.StatusOK, "Update user successfully", user)
 
 }
 
@@ -113,14 +95,14 @@ func DeleteUser(c *gin.Context) {
     var user models.User
 
     if err := database.DB.First(&user, id).Error; err != nil {
-        c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+        utils.ErrorResponse(c, http.StatusNotFound, "User not found")
         return
     }
 
     if err := database.DB.Delete(&user).Error; err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        utils.ErrorResponse(c, http.StatusInternalServerError, err.Error())
         return
     }
 
-    c.JSON(http.StatusOK, gin.H{"message": "User deleted"})
+    utils.SuccessResponse(c, http.StatusOK, "User deleted", user)
 }
