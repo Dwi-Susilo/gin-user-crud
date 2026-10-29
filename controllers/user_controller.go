@@ -72,3 +72,38 @@ func GetUser(c *gin.Context)  {
 		"data": user,
 	})
 }
+
+func UpdateUser(c *gin.Context)  {
+	id := c.Param("id")
+
+	var user models.User
+
+	if err := database.DB.First(&user, id).Error; err != nil {
+        c.JSON(http.StatusNotFound, gin.H{
+			"error": "User not found",
+		})
+        return
+    }
+
+	var input models.User
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	user.Name = input.Name
+	user.Email = input.Email
+
+	if input.Password != "" {
+		user.Password = input.Password
+	}
+
+	database.DB.Save(&user)
+	user.Password = ""
+	c.JSON(http.StatusOK, gin.H{
+		"data": user,
+	})
+
+}
