@@ -16,6 +16,7 @@ func RegisterRoutes(r *gin.Engine, db interface{})  {
 		{
 			users.POST("", controllers.CreateUser)
 			users.GET("", controllers.GetUsers)
+			users.GET("/:id", controllers.GetUser)
 		}
 	}
 
