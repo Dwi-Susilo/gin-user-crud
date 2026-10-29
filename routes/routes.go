@@ -18,6 +18,7 @@ func RegisterRoutes(r *gin.Engine, db interface{})  {
 			users.GET("", controllers.GetUsers)
 			users.GET("/:id", controllers.GetUser)
 			users.PUT("/:id", controllers.UpdateUser)
+			users.DELETE("/:id", controllers.DeleteUser)
 		}
 	}
 
