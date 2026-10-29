@@ -23,7 +23,10 @@ func main()  {
 	if err != nil {
 		log.Fatal("Could not connect to DB:", err)
 	}
-	// log.Println("Database connected:", db != nil)
+
+	if err := database.Migrate(db); err != nil {
+		log.Fatal("AutoMigrate error:", err)
+	}
 
 	r := gin.Default()
 	routes.RegisterRoutes(r, db)

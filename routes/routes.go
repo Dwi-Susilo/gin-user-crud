@@ -14,7 +14,7 @@ func RegisterRoutes(r *gin.Engine, db interface{})  {
 	{
 		users := v1.Group("/users")
 		{
-			users.POST("", controllers.Create)
+			users.POST("", controllers.CreateUser)
 		}
 	}
 
