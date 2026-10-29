@@ -1,9 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/Dwi-Susilo/gin-user-crud/database"
+	"github.com/Dwi-Susilo/gin-user-crud/routes"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -20,12 +23,18 @@ func main()  {
 	if err != nil {
 		log.Fatal("Could not connect to DB:", err)
 	}
-	log.Println("Database connected:", db != nil)
+	// log.Println("Database connected:", db != nil)
 
 	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{"message": "pong"})
-	})
+	routes.RegisterRoutes(r, db)
 
-	r.Run(":8080")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	fmt.Println("Server running on port", port)
+	if err := r.Run(":" + port); err != nil {
+		log.Fatal(err)
+	}
 }
